@@ -1,7 +1,20 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron')
+const { app, BrowserWindow, Tray, Menu ,globalShortcut, clipboard} = require('electron')
 
 let mainWindow
 let tray
+
+
+function checkClipboard(clipboard, onChange) {
+    let cache = clipboard.readText()
+    let latest
+    setInterval( _ => {
+        latest = clipboard.readText()
+        if (latest !== cache){
+            cache = latest
+            onChange(cache)
+        }
+    },750)
+}
 
 function createWindow() {
 
@@ -13,13 +26,21 @@ function createWindow() {
     tray.setToolTip('This is my application')
     tray.setContextMenu(contextMenu)
 
-    //mainWindow = new BrowserWindow({ width: 800, height: 600 })
+    mainWindow = new BrowserWindow({ width: 800, height: 600 })
+    mainWindow.loadFile('index.html')
+    mainWindow.on('closed', _ => {
+        mainWindow = null
+    })
 
-    //mainWindow.loadFile('index.html')
+    const ret = globalShortcut.register('Control+G', () => {
+        mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+    })
 
-    //mainWindow.on('closed', _ => {
-     //   mainWindow = null
-    //})
+    checkClipboard(clipboard, text => {
+        console.log(text)
+    })
+
+
 }
 
 app.on('ready', createWindow)
