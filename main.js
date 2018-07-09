@@ -3,7 +3,6 @@ const { app, BrowserWindow, Tray, Menu ,globalShortcut, clipboard} = require('el
 let mainWindow
 let tray
 
-
 function checkClipboard(clipboard, onChange) {
     let cache = clipboard.readText()
     let latest
@@ -16,8 +15,7 @@ function checkClipboard(clipboard, onChange) {
     },750)
 }
 
-function createWindow() {
-
+function createSystemTray() {
     tray = new Tray('assets/copy_icon.ico')
     const contextMenu = Menu.buildFromTemplate([
         { label: 'About', role: 'about' },
@@ -25,6 +23,11 @@ function createWindow() {
     ])
     tray.setToolTip('This is my application')
     tray.setContextMenu(contextMenu)
+}
+
+function createWindow() {
+
+    createSystemTray()
 
     mainWindow = new BrowserWindow({ width: 800, height: 600 })
     mainWindow.loadFile('index.html')
@@ -39,8 +42,6 @@ function createWindow() {
     checkClipboard(clipboard, text => {
         console.log(text)
     })
-
-
 }
 
 app.on('ready', createWindow)
@@ -49,6 +50,7 @@ app.on('window-all-closed', _ => {
     if (process.platform !== 'darwin') {
         app.quit()
     }
+    globalShortcut.unregister('Control+G')
 })
 
 app.on('activate', _ => {
